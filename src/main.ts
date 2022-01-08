@@ -1,5 +1,5 @@
 import vertexShaderSource from './shader/vert.glsl'
-import fragmentShaderSource from './shader/flag.glsl'
+import fragmentShaderSource from './shader/frag.glsl'
 
 const cSize = {
     width: 400,
@@ -7,7 +7,7 @@ const cSize = {
 } as const;
 type cSize = typeof cSize[keyof typeof cSize];
 
-const VERTEX_SIZE = 2; 
+const VERTEX_SIZE = 3; 
 
 const main = () => {
     const canvas = document.createElement('canvas');
@@ -60,21 +60,14 @@ const main = () => {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    /*
-    2___3
-    |\  |
-    | \ |
-    |__\|
-    0   1
-   */
+    // ramiel
     const vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    const VERTEX_NUMS = 4;
     const vertices = new Float32Array([
-        -1, -1,
-        1, -1,
-        -1, 1,
-        1,  1
+        -1, 1, 0,
+        1, 1, 0,
+        -1, -1, 0,
+        1, -1, 0
     ]);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
@@ -82,9 +75,26 @@ const main = () => {
     const vertexAttribLocation = gl.getAttribLocation(program, 'vertexPosition');
     gl.enableVertexAttribArray(vertexAttribLocation);
     gl.vertexAttribPointer(vertexAttribLocation, VERTEX_SIZE, gl.FLOAT, false, 0, 0);
-    
-    // Draw triangles
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, VERTEX_NUMS);
+
+    gl.enable(gl.DEPTH_TEST);
+
+    var resolution_loc = gl.getUniformLocation(program, 'resolution');
+    var mouse_loc = gl.getUniformLocation(program, 'mouse');
+    var time_loc = gl.getUniformLocation(program, 'time');
+    gl.uniform2f(resolution_loc, cSize.width, cSize.height);
+
+    function render(ms_since_page_loaded) {
+        gl.uniform1f(time_loc, ms_since_page_loaded / 1000.0);
+        // TODO: mouse
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertices.length / VERTEX_SIZE);
+
+        // Request animation again
+        requestAnimationFrame(render);
+    }
+
+    // First render which will request animation
+    render(0);
 
     gl.flush();
 }
