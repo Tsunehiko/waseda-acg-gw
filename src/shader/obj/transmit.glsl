@@ -1,7 +1,7 @@
 precision mediump float;
 
 #pragma glslify: normalObj = require('./normal.glsl')
-#pragma glslify: objColor = require('./param/color.glsl')
+#pragma glslify: objAlbedo = require('./param/albedo.glsl')
 #pragma glslify: objF0 = require('./param/f0.glsl')
 #pragma glslify: bgColor = require('../bg/color.glsl')
 #pragma glslify: Ray = require('../ray/struct.glsl')
@@ -20,7 +20,7 @@ vec3 objTransmitColor(vec3 p, vec3 v, vec3 lightPos, vec3 clight) {
 
     vec3 reflectDir = reflect(-v, n);
     float d = 0.0;  // とりあえず半透明効果は無視する
-    return transmitColor(n, reflectDir, refractColor, objColor, objF0, extinct, d, coverage);
+    return transmitColor(n, reflectDir, refractColor, objAlbedo, objF0, extinct, d, coverage);
 }
 
 #pragma glslify: export(objTransmitColor)

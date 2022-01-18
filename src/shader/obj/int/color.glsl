@@ -15,4 +15,4 @@ vec3 objIntColor(vec3 p, vec3 v, vec3 lightPos, vec3 clight) {
     return reflectColor(l, v, n, clight, albedo, F0, rg);
 }
 
-#pragma glslify: export(objColorInt)
+#pragma glslify: export(objIntColor)
