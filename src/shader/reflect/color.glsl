@@ -1,10 +1,10 @@
 precision mediump float;
 
-#pragma glslify: brdfGGX = require('./brdf/ggx.glsl')
+#pragma glslify: brdf = require('./brdf.glsl')
 #pragma glslify: pointLight = require('../light/pointlight.glsl')
 
-vec3 reflectColor(vec3 l, vec3 v, vec3 n, vec3 clight, vec3 albedo, vec3 F0, float roughness) {
-    vec3 brdfVal = brdfGGX(l, v, n, albedo, F0, roughness);
+vec3 reflectColor(vec3 l, vec3 v, vec3 n, vec3 clight, vec3 albedo, vec3 F0, float rg) {
+    vec3 brdfVal = brdf(l, v, n, F0, rg, albedo);
     return pointLight(n, l, brdfVal, clight);
 }
 

@@ -53,7 +53,12 @@ declare module 'reflect/*.glsl' {
     export default value
 }
 
-declare module 'reflect/brdf/*.glsl' {
+declare module 'reflect/diffuse/*.glsl' {
+    const value: string
+    export default value
+}
+
+declare module 'reflect/specular/*.glsl' {
     const value: string
     export default value
 }
