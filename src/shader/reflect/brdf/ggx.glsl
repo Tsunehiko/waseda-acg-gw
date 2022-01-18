@@ -1,7 +1,7 @@
 precision mediump float;
 
 #pragma glslify: PI = require('../../const/pi.glsl')
-#pragma glslify: fresnelSchlick = require('../../util/fresnelschlick.glsl')
+#pragma glslify: FSchlick = require('../../util/fschlick.glsl')
 
 float ndfGGX(vec3 n, vec3 m, float roughness) {
    float nm = dot(n, m);
@@ -16,7 +16,7 @@ vec3 maskingSmithGGX(vec3 v, vec3 m) { return step(0.0, dot(m, v)) / (1.0 + lamb
 vec3 brdfGGX(vec3 l, vec3 v, vec3 n, vec3 albedo, vec3 F0, float roughness) {
     vec3 h = normalize(l + v);
     vec3 fspec = (
-        fresnelSchlick(n, l, F0)
+        FSchlick(n, l, F0)
         * maskingSmithGGX(v, h)
         * ndfGGX(n, h, roughness)
         / 4.0
