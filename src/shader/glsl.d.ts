@@ -23,6 +23,11 @@ declare module 'const/*.glsl' {
     export default value
 }
 
+declare module 'hit/*.glsl' {
+    const value: string
+    export default value
+}
+
 declare module 'light/*.glsl' {
     const value: string
     export default value

@@ -12,58 +12,40 @@ uniform float time;
 #pragma glslify: cameraRay = require('./camera/cameraray.glsl')
 #pragma glslify: makeCamera = require('./camera/make.glsl')
 #pragma glslify: Camera = require('./camera/struct.glsl')
+#pragma glslify: Hit = require('./hit/struct.glsl')
 #pragma glslify: objReflectColor = require('./obj/reflect.glsl')
 #pragma glslify: objTransmitColor = require('./obj/transmit.glsl')
-#pragma glslify: end = require('./ray/end.glsl')
 #pragma glslify: Ray = require('./ray/struct.glsl')
-#pragma glslify: scene = require('./scene/sdf.glsl')
+#pragma glslify: hitScene = require('./scene/hit.glsl')
 
-// raymarch
-const float nearLen = 0.0;
-const float farLen = 5.0;
-const int maxStep = 256;
-const float eps = 0.0001;
-
-// light
 const vec3 lightPos = vec3(1, 1, 1);
 const vec3 clight = vec3(1);
 
-vec3 raymarch(Ray ray) {
-    float t = nearLen;
-    float h;
-    for (int i = 0; i < maxStep; i++, t += h) {
-        // 遠点まで光線がヒットせず
-        if (t > farLen) break;
+// NOTE: とりあえず適当に書いてある（後で処理全体を書き直すため）
+vec3 calcColor(Ray ray) {
+    Hit hit = hitScene(ray);
 
-        // 光線の終点とそこでの符号距離を求める
-        vec3 rayEnd = end(ray, t);
-        h = scene(rayEnd);
+    if (!hit.check) return skyColor();
 
-        // 光線がヒットしなかったら光線を伸ばして次へ
-        if (abs(h) > eps) continue;
+    vec3 v = -ray.dir;
 
-        vec3 v = -ray.dir;
+    // 光線が背景にヒット
+    const float eps = 0.0001;
+    if (abs(sdBg(hit.pos)) < eps) return bgColor(hit.pos, v, lightPos, clight);
 
-        // 光線が背景にヒット
-        if (abs(sdBg(rayEnd)) < eps) return bgColor(rayEnd, v, lightPos, clight);
+    // 光線がオブジェクトにヒット後，反射
+    // NOTE: 添字の1は反射を表す（2は屈折）
+    vec3 c1 = objReflectColor(hit.pos, v, lightPos, clight);
 
-        // 光線がオブジェクトにヒット後，反射
-        // NOTE: 添字の1は反射を表す（2は屈折）
-        vec3 c1 = objReflectColor(rayEnd, v, lightPos, clight);
+    // 光線がオブジェクトにヒット後，屈折
+    vec3 c2 = objTransmitColor(hit.pos, v, lightPos, clight);
 
-        // 光線がオブジェクトにヒット後，屈折
-        vec3 c2 = objTransmitColor(rayEnd, v, lightPos, clight);
-
-        return c1 + c2;
-    }
-
-    // 光線がヒットしなかったので空と判定
-    return skyColor();
+    return c1 + c2;
 }
 
 void main() {
     Camera camera = makeCamera();
     Ray ray = cameraRay(camera, 2.0 * gl_FragCoord.xy / resolution - 1.0);
-    vec3 color = raymarch(ray);
+    vec3 color = calcColor(ray);
     colorOut = vec4(color, 1);
 }

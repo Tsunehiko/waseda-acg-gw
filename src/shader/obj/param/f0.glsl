@@ -6,6 +6,6 @@ precision mediump float;
 #pragma glslify: F0 = require('../../util/f0.glsl')
 
 // HACK: 定数じゃないのでグローバル変数にはできない
-vec3 getObjF0() { return F0(ICE_F0, objColor, objMetal); }
+vec3 objF0() { return F0(ICE_F0, objColor, objMetal); }
 
-#pragma glslify: export(getObjF0)
+#pragma glslify: export(objF0)
