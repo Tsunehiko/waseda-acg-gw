@@ -1,8 +1,8 @@
 precision mediump float;
 
 #pragma glslify: normalObj = require('./normal.glsl')
-#pragma glslify: objAlbedo = require('./param/albedo.glsl')
-#pragma glslify: objF0 = require('./param/f0.glsl')
+#pragma glslify: getObjAlbedo = require('./param/albedo.glsl')
+#pragma glslify: getObjF0 = require('./param/f0.glsl')
 #pragma glslify: bgColor = require('../bg/color.glsl')
 #pragma glslify: Ray = require('../ray/struct.glsl')
 #pragma glslify: transmitColor = require('../transmit/color.glsl')
@@ -12,6 +12,8 @@ const vec3 extinct = vec3(0);
 const float coverage = 0.0;
 
 vec3 objTransmitColor(vec3 p, vec3 v, vec3 lightPos, vec3 clight) {
+    vec3 objF0 = getObjF0();
+
     // とりあえずrefract方向の背景から単に色を持ってくる実装
     // 本来はBTDFを使用すべき
     vec3 n = normalObj(p);
@@ -20,7 +22,7 @@ vec3 objTransmitColor(vec3 p, vec3 v, vec3 lightPos, vec3 clight) {
 
     vec3 reflectDir = reflect(-v, n);
     float d = 0.0;  // とりあえず半透明効果は無視する
-    return transmitColor(n, reflectDir, refractColor, objAlbedo, objF0, extinct, d, coverage);
+    return transmitColor(n, reflectDir, refractColor, getObjAlbedo(), objF0, extinct, d, coverage);
 }
 
 #pragma glslify: export(objTransmitColor)
