@@ -1,10 +1,12 @@
 precision mediump float;
 
+#pragma glslify: Param = require('../param/struct.glsl')
+
 struct Hit {
     bool check;
     vec3 pos;
     vec3 normal;
-    vec3 albedo;
+    Param param;
 };
 
 #pragma glslify: export(Hit)

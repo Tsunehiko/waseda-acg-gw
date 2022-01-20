@@ -48,6 +48,11 @@ declare module 'obj/param/*.glsl' {
     export default value
 }
 
+declare module 'param/*.glsl' {
+    const value: string
+    export default value
+}
+
 declare module 'ray/*.glsl' {
     const value: string
     export default value

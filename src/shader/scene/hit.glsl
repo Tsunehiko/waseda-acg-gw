@@ -2,8 +2,11 @@ precision mediump float;
 
 #pragma glslify: albedo = require('./albedo.glsl')
 #pragma glslify: normal = require('./normal.glsl')
+#pragma glslify: getParam = require('./param.glsl')
 #pragma glslify: scene = require('./sdf.glsl')
 #pragma glslify: Hit = require('../hit/struct.glsl')
+#pragma glslify: dummyHit = require('../hit/dummy.glsl')
+#pragma glslify: Param = require('../param/struct.glsl')
 #pragma glslify: end = require('../ray/end.glsl')
 #pragma glslify: Ray = require('../ray/struct.glsl')
 
@@ -24,11 +27,11 @@ Hit hitScene(Ray ray) {
         h = scene(rayEnd);
 
         // 光線がヒットした
-        if (abs(h) < eps) return Hit(true, rayEnd, normal(rayEnd), albedo(rayEnd, eps));
+        if (abs(h) < eps) return Hit(true, rayEnd, normal(rayEnd), getParam(rayEnd, eps));
     }
 
     // 光線がヒットしなかった
-    return Hit(false, vec3(0), vec3(0), vec3(0));
+    return dummyHit;
 }
 
 #pragma glslify: export(hitScene)

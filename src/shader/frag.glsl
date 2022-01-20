@@ -6,46 +6,60 @@ uniform vec2 resolution;
 uniform vec2 mouse;
 uniform float time;
 
-#pragma glslify: bgColor = require('./bg/color.glsl')
-#pragma glslify: sdBg = require('./bg/sdf.glsl')
 #pragma glslify: skyColor = require('./bg/sky/color.glsl')
 #pragma glslify: cameraRay = require('./camera/cameraray.glsl')
 #pragma glslify: makeCamera = require('./camera/make.glsl')
 #pragma glslify: Camera = require('./camera/struct.glsl')
 #pragma glslify: Hit = require('./hit/struct.glsl')
-#pragma glslify: objReflectColor = require('./obj/reflect.glsl')
-#pragma glslify: objTransmitColor = require('./obj/transmit.glsl')
+#pragma glslify: pointLight = require('./light/pointlight.glsl')
 #pragma glslify: Ray = require('./ray/struct.glsl')
+#pragma glslify: brdf = require('./reflect/brdf.glsl')
 #pragma glslify: hitScene = require('./scene/hit.glsl')
+#pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
 
-const vec3 lightPos = vec3(1, 1, 1);
+const vec3 lightPos = vec3(2, 2, 2);
 const vec3 clight = vec3(1);
+const int maxHitNum = 1;
 
-// NOTE: とりあえず適当に書いてある（後で処理全体を書き直すため）
 vec3 calcColor(Ray ray) {
-    Hit hit = hitScene(ray);
+    // 一定回数反射するか反射しなくなるまでカメラからrayを飛ばす
+    // とりあえず鏡面反射方向への反射だけ考える
+    Ray nowRay = ray;
+    Hit hitList[maxHitNum];
+    int hitNum;
+    for (hitNum = 0; hitNum < maxHitNum; hitNum++) {
+        Hit hit = hitScene(nowRay);
+        hitList[hitNum] = hit;
 
-    if (!hit.check) return skyColor();
+        if (!hit.check) break;
 
-    vec3 v = -ray.dir;
+        nowRay = Ray(hit.pos, reflect(nowRay.dir, hit.normal));
+    }
 
-    // 光線が背景にヒット
-    const float eps = 0.0001;
-    if (abs(sdBg(hit.pos)) < eps) return bgColor(hit.pos, v, lightPos, clight);
+    // 1回もヒットしなかったら空と判定
+    if (hitNum == 0) return skyColor();
 
-    // 光線がオブジェクトにヒット後，反射
-    // NOTE: 添字の1は反射を表す（2は屈折）
-    vec3 c1 = objReflectColor(hit.pos, v, lightPos, clight);
+    // カメラからの光線を逆にたどりながら光源から光線を飛ばす
+    // 全ての反射において点光源として計算
+    vec3 color = clight;
+    for (int i = hitNum - 1; i >= 0; i--) {
+        Hit hit = hitList[i];
 
-    // 光線がオブジェクトにヒット後，屈折
-    vec3 c2 = objTransmitColor(hit.pos, v, lightPos, clight);
+        vec3 lEnd = (i == hitNum - 1) ? lightPos : hitList[i + 1].pos;
+        vec3 l = normalize(lEnd - hit.pos);
 
-    return c1 + c2;
+        vec3 vEnd = (i == 0) ? ray.origin : hitList[i - 1].pos;
+        vec3 v = normalize(vEnd - hit.pos);
+
+        color = pointLight(l, v, color, hit);
+    }
+
+    return color;
 }
 
 void main() {
     Camera camera = makeCamera();
     Ray ray = cameraRay(camera, 2.0 * gl_FragCoord.xy / resolution - 1.0);
     vec3 color = calcColor(ray);
-    colorOut = vec4(color, 1);
+    colorOut = vec4(gammaCorrect(color), 1);
 }

@@ -19,7 +19,7 @@ vec3 brdfDiffHammon(vec3 l, vec3 v, vec3 n, vec3 F0, float rg, vec3 albedo) {
     vec3 frough = vec3(kfacing * (0.9 - 0.4 * kfacing) * (0.5 + nh) / nh);
     vec3 fsmooth = 21.0 / 20.0 * (1.0 - F0) * (1.0 - pow(1.0 - nl, 5.0)) * (1.0 - pow(1.0 - nv, 5.0));
 
-    return step(0.0, nl) * step(0.0, nv) * albedo / PI * (mix(fsmooth, frough, ag) + albedo * fmulti);
+    return (1.0 - F0) * step(0.0, nl) * step(0.0, nv) * albedo / PI * (mix(fsmooth, frough, ag) + albedo * fmulti);
 }
 
 #pragma glslify: export(brdfDiffHammon)
