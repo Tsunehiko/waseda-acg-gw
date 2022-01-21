@@ -10,20 +10,43 @@ uniform float time;
 #pragma glslify: cameraRay = require('./camera/cameraray.glsl')
 #pragma glslify: makeCamera = require('./camera/make.glsl')
 #pragma glslify: Camera = require('./camera/struct.glsl')
+#pragma glslify: PI = require('./const/pi.glsl')
 #pragma glslify: Hit = require('./hit/struct.glsl')
 #pragma glslify: pointLight = require('./light/pointlight.glsl')
 #pragma glslify: Ray = require('./ray/struct.glsl')
 #pragma glslify: brdf = require('./reflect/brdf.glsl')
 #pragma glslify: hitScene = require('./scene/hit.glsl')
 #pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
+#pragma glslify: orthToSphere = require('./util/orthtosphere.glsl')
+#pragma glslify: rand2 = require('./util/rand2.glsl')
+#pragma glslify: sphereToOrth = require('./util/spheretoorth.glsl')
+#pragma glslify: twoSign = require('./util/twosign.glsl')
 
 const vec3 lightPos = vec3(2, 2, 2);
 const vec3 clight = vec3(1);
-const int maxHitNum = 3;
+const int maxHitNum = 2;
+
+vec2 calcThetaPhi(vec3 p) {
+    float theta = acos(p.z / length(p));
+    float phi = twoSign(p.y) * acos(p.x / length(p.xy));
+    return vec2(theta, phi);
+}
+
+vec3 randomReflectDir(vec3 n) {
+    vec2 random = rand2(gl_FragCoord.xy);
+    float randTheta = random[0] * 0.5 * PI;
+    float randPhi = random[1] * 2.0 * PI;
+
+    vec3 sphereN = orthToSphere(n);
+    float r = sphereN[0];
+    float theta = sphereN[1] + randTheta;
+    float phi = sphereN[2] + randPhi;
+
+    return sphereToOrth(vec3(r, theta, phi));
+}
 
 vec3 calcColor(Ray ray) {
     // 一定回数反射するか反射しなくなるまでカメラからrayを飛ばす
-    // とりあえず鏡面反射方向への反射だけ考える
     Ray nowRay = ray;
     Hit hitList[maxHitNum];
     int hitNum;
@@ -33,7 +56,9 @@ vec3 calcColor(Ray ray) {
 
         if (!hit.check) break;
 
-        nowRay = Ray(hit.pos, reflect(nowRay.dir, hit.normal));
+        // 単位半球面からランダムに選んだ方向に反射させる
+        vec3 reflectDir = randomReflectDir(hit.normal);
+        nowRay = Ray(hit.pos, reflectDir);
     }
 
     // 1回もヒットしなかったら空と判定
@@ -45,8 +70,7 @@ vec3 calcColor(Ray ray) {
     for (int i = hitNum - 1; i >= 0; i--) {
         Hit hit = hitList[i];
 
-        vec3 lEnd = (i == hitNum - 1) ? lightPos : hitList[i + 1].pos;
-        vec3 l = normalize(lEnd - hit.pos);
+        vec3 l = (i == hitNum - 1) ? nowRay.dir : hitList[i + 1].pos - hit.pos;
 
         vec3 vEnd = (i == 0) ? ray.origin : hitList[i - 1].pos;
         vec3 v = normalize(vEnd - hit.pos);
