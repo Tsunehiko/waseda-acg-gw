@@ -1,18 +1,17 @@
 precision mediump float;
 
-#pragma glslify: albedo = require('./albedo.glsl')
+#pragma glslify: getParam = require('./getparam.glsl')
 #pragma glslify: normal = require('./normal.glsl')
-#pragma glslify: getParam = require('./param.glsl')
 #pragma glslify: scene = require('./sdf.glsl')
 #pragma glslify: Hit = require('../hit/struct.glsl')
-#pragma glslify: dummyHit = require('../hit/dummy.glsl')
-#pragma glslify: Param = require('../param/struct.glsl')
+#pragma glslify: notHit = require('../hit/not.glsl')
+#pragma glslify: dummyParam = require('../param/dummy.glsl')
 #pragma glslify: end = require('../ray/end.glsl')
 #pragma glslify: Ray = require('../ray/struct.glsl')
 
-const float nearLen = 0.1;  // MEMO: epsよりは大きくする
+const float nearLen = 0.01;  // MEMO: epsよりは大きくする
 const float farLen = 5.0;
-const int maxStep = 1024;
+const int maxStep = 256;
 const float eps = 0.0001;
 
 Hit hitScene(Ray ray) {
@@ -31,7 +30,7 @@ Hit hitScene(Ray ray) {
     }
 
     // 光線がヒットしなかった
-    return dummyHit;
+    return notHit;
 }
 
 #pragma glslify: export(hitScene)
