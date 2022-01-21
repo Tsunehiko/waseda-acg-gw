@@ -10,7 +10,7 @@ precision mediump float;
 #pragma glslify: end = require('../ray/end.glsl')
 #pragma glslify: Ray = require('../ray/struct.glsl')
 
-const float nearLen = 0.0;
+const float nearLen = 0.1;  // MEMO: epsよりは大きくする
 const float farLen = 5.0;
 const int maxStep = 256;
 const float eps = 0.0001;

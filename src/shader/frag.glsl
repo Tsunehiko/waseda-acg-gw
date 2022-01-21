@@ -19,7 +19,7 @@ uniform float time;
 
 const vec3 lightPos = vec3(2, 2, 2);
 const vec3 clight = vec3(1);
-const int maxHitNum = 1;
+const int maxHitNum = 3;
 
 vec3 calcColor(Ray ray) {
     // 一定回数反射するか反射しなくなるまでカメラからrayを飛ばす
