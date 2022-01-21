@@ -20,17 +20,10 @@ uniform float time;
 #pragma glslify: orthToSphere = require('./util/orthtosphere.glsl')
 #pragma glslify: rand2 = require('./util/rand2.glsl')
 #pragma glslify: sphereToOrth = require('./util/spheretoorth.glsl')
-#pragma glslify: twoSign = require('./util/twosign.glsl')
 
 const vec3 lightPos = vec3(2, 2, 2);
 const vec3 clight = vec3(1);
 const int maxHitNum = 2;
-
-vec2 calcThetaPhi(vec3 p) {
-    float theta = acos(p.z / length(p));
-    float phi = twoSign(p.y) * acos(p.x / length(p.xy));
-    return vec2(theta, phi);
-}
 
 vec3 randomReflectDir(vec3 n) {
     vec2 random = rand2(gl_FragCoord.xy);
