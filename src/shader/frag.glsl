@@ -22,27 +22,20 @@ const vec3 lightPos = vec3(2, 2, 2);
 const vec3 clight = vec3(1);
 const int maxHitNum = 3;
 
-float DFAO(vec3 p, vec3 n){
-    // step size
-    float AO_STEP_SIZE = 0.07;
+float DFAO(vec3 p, vec3 n, float AO_INTENSITY, float AO_STEP_SIZE, int AO_MAX_ITER){
     float STEP_f = float(AO_STEP_SIZE);
-    // max iteration
-    int AO_MAX_ITER = 7;
-
-    // intensity
-    float AO_INTENSITY = 0.18;
-
     float ao = 0.0;
     float dist;
     for (int i = 0; i < AO_MAX_ITER; i++){
         float i_f = float(i);
         dist = STEP_f * i_f;
+        vec3 checkpoint = p + n*dist;
         ao += max(
-                (dist - sdScene(p + n*dist) / dist),
+                (dist - sdScene(checkpoint)) / dist,
                 0.0
                 );
     }
-    return 1.0 - ao*AO_INTENSITY;
+    return clamp(1.0 - ao*AO_INTENSITY, 0.0, 1.0);
 }
 
 
@@ -79,7 +72,8 @@ vec3 calcColor(Ray ray) {
         color = pointLight(l, v, color, hit);
         
         // Ambient Occlusion
-        float ao = DFAO(hit.pos, hit.normal);
+        float ao_step_size = 0.03; int ao_max_iter = 18; float ao_intensity = 0.05;
+        float ao = DFAO(hit.pos, hit.normal, ao_intensity, ao_step_size, ao_max_iter);
         color = ao * color;
     }
 
