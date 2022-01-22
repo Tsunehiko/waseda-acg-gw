@@ -4,6 +4,7 @@ precision mediump float;
 #pragma glslify: sdBody = require('./body.glsl')
 #pragma glslify: sdBack = require('./back.glsl')
 #pragma glslify: sdLeg = require('./leg.glsl')
+#pragma glslify: sdEye = require('./eye.glsl')
 #pragma glslify: sdAdd = require('./add.glsl')
 
 vec4 qConjugate(vec4 q) {
@@ -45,12 +46,14 @@ float sdRegice (vec3 p){
     float d_arm_l = sdArm(p_arm_l);
 
     float d_body = sdBody(p);
+
+    float d_eye = sdEye(p);
     
     float d_leg = sdLeg(p);
 
     float d_back = sdBack(p);
 
-    return sdAdd(sdAdd(sdAdd(sdAdd(d_arm_l, d_arm_r), d_body), d_back), d_leg);
+    //return sdAdd(sdAdd(sdAdd(sdAdd(sdAdd(d_arm_l, d_arm_r), d_body), d_back), d_leg), d_eye);
 }
 
 #pragma glslify: export(sdRegice)
