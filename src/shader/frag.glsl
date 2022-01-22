@@ -16,10 +16,34 @@ uniform float time;
 #pragma glslify: brdf = require('./reflect/brdf.glsl')
 #pragma glslify: hitScene = require('./scene/hit.glsl')
 #pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
+#pragma glslify: sdScene = require('./scene/sdf.glsl')
 
 const vec3 lightPos = vec3(2, 2, 2);
 const vec3 clight = vec3(1);
 const int maxHitNum = 3;
+
+float DFAO(vec3 p, vec3 n){
+    // step size
+    float AO_STEP_SIZE = 0.07;
+    float STEP_f = float(AO_STEP_SIZE);
+    // max iteration
+    int AO_MAX_ITER = 8;
+    // intensity
+    float AO_INTENSITY = 0.18;
+
+    float ao = 0.0;
+    float dist;
+    for (int i = 0; i < AO_MAX_ITER; i++){
+        float i_f = float(i);
+        dist = STEP_f * i_f;
+        ao += max(
+                (dist - sdScene(p + n*dist) / dist),
+                0.0
+                );
+    }
+    return 1.0 - ao*AO_INTENSITY;
+}
+
 
 vec3 calcColor(Ray ray) {
     // 一定回数反射するか反射しなくなるまでカメラからrayを飛ばす
@@ -51,7 +75,9 @@ vec3 calcColor(Ray ray) {
         vec3 vEnd = (i == 0) ? ray.origin : hitList[i - 1].pos;
         vec3 v = normalize(vEnd - hit.pos);
 
-        color = pointLight(l, v, color, hit);
+        float ao = DFAO(hit.pos, hit.normal);
+        color = ao * pointLight(l, v, color, hit);
+        //color = pointLight(l, v, color, hit);
     }
 
     return color;
