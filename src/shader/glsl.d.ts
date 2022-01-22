@@ -8,6 +8,11 @@ declare module 'bsdf/*.glsl' {
     export default value
 }
 
+declare module 'bsdf/ggx/*.glsl' {
+    const value: string
+    export default value
+}
+
 declare module 'camera/*.glsl' {
     const value: string
     export default value
@@ -23,11 +28,6 @@ declare module 'hit/*.glsl' {
     export default value
 }
 
-declare module 'light/*.glsl' {
-    const value: string
-    export default value
-}
-
 declare module 'param/*.glsl' {
     const value: string
     export default value
@@ -38,32 +38,12 @@ declare module 'ray/*.glsl' {
     export default value
 }
 
-declare module 'reflect/*.glsl' {
-    const value: string
-    export default value
-}
-
-declare module 'reflect/diffuse/*.glsl' {
-    const value: string
-    export default value
-}
-
-declare module 'reflect/specular/*.glsl' {
-    const value: string
-    export default value
-}
-
 declare module 'scene/*.glsl' {
     const value: string
     export default value
 }
 
 declare module 'sdf/*.glsl' {
-    const value: string
-    export default value
-}
-
-declare module 'transmit/*.glsl' {
     const value: string
     export default value
 }
