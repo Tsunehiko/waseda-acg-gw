@@ -3,6 +3,9 @@ precision mediump float;
 #pragma glslify: PI = require('../../const/pi.glsl')
 #pragma glslify: rand3 = require('../../util/rand3.glsl')
 
+const float alphaX = 1.0;
+const float alphaY = 1.0;
+
 vec3 sampleGGXVNDF(vec3 V_, float alpha_x, float alpha_y, float U1, float U2)
 {
     // stretch view
@@ -27,12 +30,6 @@ vec3 sampleGGXVNDF(vec3 V_, float alpha_x, float alpha_y, float U1, float U2)
     return N;
 }
 
-vec3 sampleMGGX(vec3 n, vec3 seed) {
-    vec3 random = rand3(seed);
-    float u1 = (random[0] + random[1]) / 2.0;
-    float u2 = random[2];
-
-    return sampleGGXVNDF(n, 1.0, 1.0, u1, u2);
-}
+vec3 sampleMGGX(vec3 n, float u1, float u2) { return sampleGGXVNDF(n, alphaX, alphaY, u1, u2); }
 
 #pragma glslify: export(sampleMGGX)

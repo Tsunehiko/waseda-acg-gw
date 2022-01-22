@@ -60,7 +60,6 @@ const main = () => {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // ramiel
     const vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     const vertices = new Float32Array([
@@ -81,7 +80,9 @@ const main = () => {
     var resolution_loc = gl.getUniformLocation(program, 'resolution');
     var mouse_loc = gl.getUniformLocation(program, 'mouse');
     var time_loc = gl.getUniformLocation(program, 'time');
+    var seed_loc = gl.getUniformLocation(program, 'seed');
     gl.uniform2f(resolution_loc, cSize.width, cSize.height);
+    gl.uniform1ui(seed_loc, Math.floor(Math.random() * (1 << 31)));
 
     function render(ms_since_page_loaded) {
         gl.uniform1f(time_loc, ms_since_page_loaded / 1000.0);
