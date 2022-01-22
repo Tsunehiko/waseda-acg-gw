@@ -92,3 +92,8 @@ declare module 'util/*.glsl' {
     const value: string
     export default value
 }
+
+declare module 'ao/*.glsl' {
+    const value: string
+    export default value
+}

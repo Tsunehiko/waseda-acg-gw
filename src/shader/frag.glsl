@@ -16,28 +16,11 @@ uniform float time;
 #pragma glslify: brdf = require('./reflect/brdf.glsl')
 #pragma glslify: hitScene = require('./scene/hit.glsl')
 #pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
-#pragma glslify: sdScene = require('./scene/sdf.glsl')
+#pragma glslify: DFAO = require('./ao/dfao.glsl')
 
 const vec3 lightPos = vec3(2, 2, 2);
 const vec3 clight = vec3(1);
 const int maxHitNum = 3;
-
-float DFAO(vec3 p, vec3 n, float AO_INTENSITY, float AO_STEP_SIZE, int AO_MAX_ITER){
-    float STEP_f = float(AO_STEP_SIZE);
-    float ao = 0.0;
-    float dist;
-    for (int i = 0; i < AO_MAX_ITER; i++){
-        float i_f = float(i);
-        dist = STEP_f * i_f;
-        vec3 checkpoint = p + n*dist;
-        ao += max(
-                (dist - sdScene(checkpoint)) / dist,
-                0.0
-                );
-    }
-    return clamp(1.0 - ao*AO_INTENSITY, 0.0, 1.0);
-}
-
 
 vec3 calcColor(Ray ray) {
     // 一定回数反射するか反射しなくなるまでカメラからrayを飛ばす
