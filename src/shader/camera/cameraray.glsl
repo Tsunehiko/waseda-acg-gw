@@ -6,7 +6,7 @@ precision mediump float;
 const float targetDepth = 0.9;  // カメラのズーム倍率？
 
 Ray cameraRay(Camera camera, vec2 p) {
-    return Ray(camera.pos, normalize(camera.side * p.x + camera.up * p.y + camera.dir * targetDepth));
+    return Ray(camera.pos, normalize(camera.side * p.x + camera.up * p.y + camera.dir * targetDepth), 1.0);
 }
 
 #pragma glslify: export(cameraRay)

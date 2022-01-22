@@ -17,7 +17,7 @@ const float eps = 0.0001;
 Hit hitScene(Ray ray) {
     float t = nearLen;
     float h;
-    for (int i = 0; i < maxStep; i++, t += h) {
+    for (int i = 0; i < maxStep; i++, t += abs(h)) {
         // 遠点まで光線がヒットせず
         if (t > farLen) break;
 
