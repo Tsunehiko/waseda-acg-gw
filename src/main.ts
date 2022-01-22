@@ -90,7 +90,7 @@ const main = () => {
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertices.length / VERTEX_SIZE);
 
         // Request animation again
-        requestAnimationFrame(render);
+        //requestAnimationFrame(render);
     }
 
     // First render which will request animation
