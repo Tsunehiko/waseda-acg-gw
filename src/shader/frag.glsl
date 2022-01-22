@@ -89,6 +89,7 @@ vec3 sampleColor(Ray ray, int sampleIdx) {
 vec3 calcColor(Ray ray) {
     vec3 color = vec3(0);
     for (int i = 0; i < sampleNum; i++) color += sampleColor(ray, i);
+    //return color;
     return color / float(sampleNum);
 }
 

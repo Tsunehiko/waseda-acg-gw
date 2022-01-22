@@ -3,6 +3,11 @@ declare module '*.glsl' {
     export default value
 }
 
+declare module 'bsdf/*.glsl' {
+    const value: string
+    export default value
+}
+
 declare module 'camera/*.glsl' {
     const value: string
     export default value
