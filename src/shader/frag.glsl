@@ -27,7 +27,7 @@ float DFAO(vec3 p, vec3 n){
     float AO_STEP_SIZE = 0.07;
     float STEP_f = float(AO_STEP_SIZE);
     // max iteration
-    int AO_MAX_ITER = 8;
+    int AO_MAX_ITER = 10;
     // intensity
     float AO_INTENSITY = 0.18;
 
@@ -75,9 +75,10 @@ vec3 calcColor(Ray ray) {
         vec3 vEnd = (i == 0) ? ray.origin : hitList[i - 1].pos;
         vec3 v = normalize(vEnd - hit.pos);
 
+        color = pointLight(l, v, color, hit);
+        
+        // Ambient Occlusion
         float ao = DFAO(hit.pos, hit.normal);
-        color = ao * pointLight(l, v, color, hit);
-        //color = pointLight(l, v, color, hit);
     }
 
     return color;
