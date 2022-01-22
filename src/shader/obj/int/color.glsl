@@ -4,7 +4,7 @@ precision mediump float;
 #pragma glslify: ICE_TO_SILVER_F0 = require('../../const/icetosilverf0.glsl')
 #pragma glslify: reflectColor = require('../../reflect/color.glsl')
 
-const vec3 color = vec3(1);
+const vec3 color = vec3(1,1,0);
 const vec3 F0 = ICE_TO_SILVER_F0;
 const float rg = 0.0;
 
