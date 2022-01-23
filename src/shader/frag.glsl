@@ -1,11 +1,13 @@
 #version 300 es
 precision mediump float;
+precision mediump usampler2D;
 
 out vec4 colorOut;
 uniform vec2 resolution;
 uniform vec2 mouse;
 uniform float time;
 uniform uint seed;
+uniform usampler2D u_texture;
 
 #pragma glslify: FSchlick = require('./bsdf/fschlick.glsl')
 #pragma glslify: G1 = require('./bsdf/g1.glsl')
@@ -41,16 +43,15 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
     // 一定回数反射する・反射しなくなる・光源に当たるまでカメラからrayを飛ばす
     Ray nowRay = ray;
     vec3 coef = vec3(1);
-    float prob = 1.0;
     for (int i = 0; i < maxHitNum; i++) {
         Hit hit = hitScene(nowRay);
         if (!hit.check) break;
-        if (hit.param.isLight) return coef * hit.param.clight / prob;
+        if (hit.param.isLight) return coef * hit.param.clight;
 
         vec3 v = -nowRay.dir;
         bool goOut = dot(hit.normal, v) < 0.0;
         vec3 n = goOut ? -hit.normal : hit.normal;
-        vec3 m = sampleM(n, random(randState), random(randState));
+        vec3 m = sampleM(n, hit.param.rg, random(randState), random(randState));
 
         // 反射させるか屈折させるかを決定する
         bool doRefract = false;
@@ -70,12 +71,12 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
         // 確率と次の光線を求める
         vec3 l;
         if (doRefract) {
-            prob *= 1.0 - F;
             l = refractDir;
             nowRay.ior = hit.param.ior;
+            coef *= 1.0 - F;
         } else {
-            prob *= F;
             l = reflect(-v, m);
+            coef *= F;
         }
         coef *= hit.param.albedo * G1(l, n, m, hit.param.rg);
         nowRay.origin = hit.pos;
@@ -93,7 +94,7 @@ vec3 calcColor(Ray ray, inout RandState randState) {
 }
 
 void main() {
-    RandState randState = RandState(seed);
+    RandState randState = RandState(texture(u_texture, gl_FragCoord.xy / resolution)[0]);
 
     Camera camera = makeCamera();
     Ray ray = cameraRay(camera, 2.0 * gl_FragCoord.xy / resolution - 1.0);

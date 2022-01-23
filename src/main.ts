@@ -77,12 +77,26 @@ const main = () => {
 
     gl.enable(gl.DEPTH_TEST);
 
+    // uniform
     var resolution_loc = gl.getUniformLocation(program, 'resolution');
     var mouse_loc = gl.getUniformLocation(program, 'mouse');
     var time_loc = gl.getUniformLocation(program, 'time');
     var seed_loc = gl.getUniformLocation(program, 'seed');
     gl.uniform2f(resolution_loc, cSize.width, cSize.height);
     gl.uniform1ui(seed_loc, (Math.random() * 4294967296) >>> 0);
+
+    // seed for each pixel
+    var seed_num = cSize.width * cSize.height; 
+    var seed_ary = new Uint32Array(seed_num);
+    for (var i = 0; i < seed_num; i++) seed_ary[i] = (Math.random() * 4294967296) >>> 0;
+
+    // seed texture
+    var seed_texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, seed_texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32UI, cSize.width, cSize.height, 0, gl.RED_INTEGER, gl.UNSIGNED_INT, seed_ary);
+    // なんか2回呼ばないとおかしくなる
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
     function render(ms_since_page_loaded) {
         gl.uniform1f(time_loc, ms_since_page_loaded / 1000.0);

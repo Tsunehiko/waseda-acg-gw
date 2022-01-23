@@ -33,13 +33,13 @@ Param getParam(vec3 p, float eps) {
     switch (getIdx(p, eps)) {
         // 光源（上）
         case 0:
-            return getLightParam(vec3(1));
+            return getLightParam(vec3(15));
         // 背景
         case 1:
             ior = 0.0;
             rawF0 = STONE_F0;
             csurf = bgColor(p, vec3(0.2), vec3(0.8), 2.0);
-            rg = 0.0;
+            rg = 0.9;
             metallic = 0.0;
             canTransmit = false;
             break;
