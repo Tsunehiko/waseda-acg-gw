@@ -82,7 +82,7 @@ const main = () => {
     var time_loc = gl.getUniformLocation(program, 'time');
     var seed_loc = gl.getUniformLocation(program, 'seed');
     gl.uniform2f(resolution_loc, cSize.width, cSize.height);
-    gl.uniform1ui(seed_loc, Math.floor(Math.random() * (1 << 31)));
+    gl.uniform1ui(seed_loc, (Math.random() * 4294967296) >>> 0);
 
     function render(ms_since_page_loaded) {
         gl.uniform1f(time_loc, ms_since_page_loaded / 1000.0);

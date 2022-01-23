@@ -35,7 +35,7 @@ uint xorShift32(inout RandState randState) {
     return x;
 }
 
-float random(inout RandState randState) { return float(xorShift32(randState)) * 2.3283064e-10; }
+float random(inout RandState randState) { return float(xorShift32(randState)) / 4294967296.0; }
 
 vec3 sampleColor(Ray ray, inout RandState randState) {
     // 一定回数反射する・反射しなくなる・光源に当たるまでカメラからrayを飛ばす
