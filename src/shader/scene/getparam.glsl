@@ -31,7 +31,7 @@ Param getParam(vec3 p, float eps) {
     switch (getIdx(p, eps)) {
         // 光源（上）
         case 0:
-            return getLightParam(vec3(15));
+            return getLightParam(vec3(1));
         // 背景
         case 1:
             ior = 0.0;

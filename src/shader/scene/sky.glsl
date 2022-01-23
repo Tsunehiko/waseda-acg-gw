@@ -1,6 +1,6 @@
 precision mediump float;
 
-const vec3 color = vec3(0.0, 0.5, 0.8);
+const vec3 color = vec3(0.9, 1.0, 1.0);
 
 vec3 skyColor() { return color; }
 

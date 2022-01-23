@@ -1,8 +1,8 @@
 precision mediump float;
 
-const vec3 color_a = vec3(0.50, 0.40, 0.30);
-const vec3 color_b = vec3(0.60, 0.45, 0.37);
-const vec3 color_c = vec3(0.71, 0.66, 0.59);
+const vec3 color_a = vec3(0.35, 0.22, 0.04);
+const vec3 color_b = vec3(0.81, 0.5, 0.23);
+const vec3 color_c = vec3(0.81, 0.5, 0.23);
 
 vec3 mod289(vec3 x) {
   return x - floor(x * (1.0 / 289.0)) * 289.0;
