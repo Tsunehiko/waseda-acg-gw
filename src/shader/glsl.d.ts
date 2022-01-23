@@ -43,6 +43,16 @@ declare module 'scene/*.glsl' {
     export default value
 }
 
+declare module 'scene/bg/*.glsl' {
+    const value: string
+    export default value
+}
+
+declare module 'scene/obj/*.glsl' {
+    const value: string
+    export default value
+}
+
 declare module 'sdf/*.glsl' {
     const value: string
     export default value

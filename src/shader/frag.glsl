@@ -18,11 +18,12 @@ uniform usampler2D u_texture;
 #pragma glslify: Hit = require('./hit/struct.glsl')
 #pragma glslify: Ray = require('./ray/struct.glsl')
 #pragma glslify: hitScene = require('./scene/hit.glsl')
+#pragma glslify: skyColor = require('./scene/sky.glsl')
 #pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
 #pragma glslify: nlPlus = require('./util/nlplus.glsl')
 
 const float eps = 0.0001;
-const int maxHitNum = 10;
+const int maxHitNum = 5;
 const int sampleNum = 20;
 
 // HACK: なんか別ファイルに定義するとsyntax errorで動かないのでここにrand関係を書く
@@ -45,7 +46,7 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
     vec3 coef = vec3(1);
     for (int i = 0; i < maxHitNum; i++) {
         Hit hit = hitScene(nowRay);
-        if (!hit.check) break;
+        if (!hit.check) return skyColor();
         if (hit.param.isLight) return coef * hit.param.clight;
 
         vec3 v = -nowRay.dir;

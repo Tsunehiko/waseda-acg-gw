@@ -17,16 +17,16 @@ const float eps = 0.0001;
 Hit hitScene(Ray ray) {
     float t = nearLen;
     float h;
-    for (int i = 0; i < maxStep; i++, t += abs(h)) {
+    for (int i = 0; i < maxStep; i++, t += h) {
         // 遠点まで光線がヒットせず
         if (t > farLen) break;
 
         // 光線の終点とそこでの符号距離を求める
         vec3 rayEnd = end(ray, t);
-        h = scene(rayEnd);
+        h = abs(scene(rayEnd));
 
         // 光線がヒットした
-        if (abs(h) < eps) return Hit(true, rayEnd, normal(rayEnd), getParam(rayEnd, eps));
+        if (h < eps) return Hit(true, rayEnd, normal(rayEnd), getParam(rayEnd, eps));
     }
 
     // 光線がヒットしなかった

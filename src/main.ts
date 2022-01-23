@@ -81,9 +81,7 @@ const main = () => {
     var resolution_loc = gl.getUniformLocation(program, 'resolution');
     var mouse_loc = gl.getUniformLocation(program, 'mouse');
     var time_loc = gl.getUniformLocation(program, 'time');
-    var seed_loc = gl.getUniformLocation(program, 'seed');
     gl.uniform2f(resolution_loc, cSize.width, cSize.height);
-    gl.uniform1ui(seed_loc, (Math.random() * 4294967296) >>> 0);
 
     // seed for each pixel
     var seed_num = cSize.width * cSize.height; 
