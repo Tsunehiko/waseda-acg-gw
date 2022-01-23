@@ -1,7 +1,5 @@
 precision mediump float;
 
-// #pragma glslify: snoise3 = require(glsl-noise/simplex/3d)
-
 vec3 mod289(vec3 x) {
   return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
@@ -94,26 +92,19 @@ float snoise3(vec3 v)
 								dot(p2,x2), dot(p3,x3) ) );
 }
 
-float sdCave( vec3 p, int n, float persistence) {
-
-    float v = 0.0;
-    float total = 0.0;
-    float amplitude = 1.0;
-
-    for(int i = 0 ; i < 10; ++i) {
-        if(i >= n) { break; }
-
-        float signal = (1.0 - abs(  snoise3(p) )  );
-        signal = pow(signal, 8.0);
-
-        v += amplitude * signal;
-        total += amplitude;
-
-        amplitude  *= persistence;
-        p *= 2.0; // double freq.
-
-    }
-    return v / total;
+float sdCave(vec3 p, vec3 a, vec3 b, float r, float w)
+{
+    vec3  ba = b - a;
+    vec3  pa = p - a;
+    float baba = dot(ba,ba);
+    float paba = dot(pa,ba);
+    float x = length(pa*baba-ba*paba) - r*baba;
+    float y = abs(paba-baba*0.5)-baba*0.5;
+    float x2 = x*x;
+    float y2 = y*y*baba;
+    float d = (max(x,y)<0.0)?-min(x2,y2):(((x>0.0)?x2:0.0)+((y>0.0)?y2:0.0));
+    float noise = snoise3(p) * w;
+    return -(sign(d)*sqrt(abs(d))/baba + noise);
 }
 
 #pragma glslify: export(sdCave)
