@@ -9,7 +9,8 @@ const vec3 b = vec3(0.5, 0.3, 0.3);
 const float r = 0.08;
 
 float sdObj(vec3 p) { 
-    return sdRegice(p); 
+    // return sdRegice(p);
+    return sdSphere(p, r); 
     }
 
 #pragma glslify: export(sdObj)

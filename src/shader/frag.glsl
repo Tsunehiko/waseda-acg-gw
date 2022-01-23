@@ -58,7 +58,7 @@ vec3 calcColor(Ray ray) {
 }
 
 void main() {
-    Camera camera = makeCamera();
+    Camera camera = makeCamera(time);
     Ray ray = cameraRay(camera, 2.0 * gl_FragCoord.xy / resolution - 1.0);
     vec3 color = calcColor(ray);
     colorOut = vec4(gammaCorrect(color), 1);

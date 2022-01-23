@@ -53,7 +53,7 @@ float sdRegice (vec3 p){
 
     float d_back = sdBack(p);
 
-    //return sdAdd(sdAdd(sdAdd(sdAdd(sdAdd(d_arm_l, d_arm_r), d_body), d_back), d_leg), d_eye);
+    return sdAdd(sdAdd(sdAdd(sdAdd(sdAdd(d_arm_l, d_arm_r), d_body), d_back), d_leg), d_eye);
 }
 
 #pragma glslify: export(sdRegice)

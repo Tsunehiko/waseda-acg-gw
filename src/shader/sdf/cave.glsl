@@ -1,53 +1,119 @@
 precision mediump float;
 
-// constants for the camera tunnel
-const vec2 cama=vec2(-2.6943,3.0483);
-const vec2 camb=vec2(0.2516,0.1749);
-const vec2 camc=vec2(-3.7902,2.4478);
-const vec2 camd=vec2(0.0865,-0.1664);
+// #pragma glslify: snoise3 = require(glsl-noise/simplex/3d)
 
-const vec2 lighta=vec2(1.4301,4.0985);
-const vec2 lightb=vec2(-0.1276,0.2347);
-const vec2 lightc=vec2(-2.2655,1.5066);
-const vec2 lightd=vec2(-0.1284,0.0731);
-
-// calculates the position of a single tunnel
-vec2 Position(float z, vec2 a, vec2 b, vec2 c, vec2 d)
-{
-	return sin(z*a)*b+cos(z*c)*d;
+vec3 mod289(vec3 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
 
-// calculates 3D positon of a tunnel for a given time
-vec3 Position3D(float time, vec2 a, vec2 b, vec2 c, vec2 d)
-{
-	return vec3(Position(time,a,b,c,d),time);
+vec4 mod289(vec4 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
 
-// 2d distance field for a slice of a single tunnel
-float Distance(vec3 p, vec2 a, vec2 b, vec2 c, vec2 d, vec2 e, float r)
-{
-	vec2 pos=Position(p.z,a,b,c,d);	
-	float radius=max(5.0,r+sin(p.z*e.x)*e.y)/10000.0;
-	return radius/dot(p.xy-pos,p.xy-pos);
+vec4 permute(vec4 x) {
+     return mod289(((x*34.0)+1.0)*x);
 }
 
-// 2d distance field for a slice of the tunnel network
-float sdCave(vec3 pos)
+vec4 taylorInvSqrt(vec4 r)
 {
-	float d=0.0;
-	
-	d+=Distance(pos,cama,camb,camc,camd,vec2(2.1913,15.4634),70.0000);
-	d+=Distance(pos,lighta,lightb,lightc,lightd,vec2(0.3814,12.7206),17.0590);
-	d+=Distance(pos,vec2(2.7377,-1.2462),vec2(-0.1914,-0.2339),vec2(-1.3698,-0.6855),vec2(0.1049,-0.1347),vec2(-1.1157,13.6200),27.3718);
-	d+=Distance(pos,vec2(-2.3815,0.2382),vec2(-0.1528,-0.1475),vec2(0.9996,-2.1459),vec2(-0.0566,-0.0854),vec2(0.3287,12.1713),21.8130);
-	d+=Distance(pos,vec2(-2.7424,4.8901),vec2(-0.1257,0.2561),vec2(-0.4138,2.6706),vec2(-0.1355,0.1648),vec2(2.8162,14.8847),32.2235);
-	d+=Distance(pos,vec2(-2.2158,4.5260),vec2(0.2834,0.2319),vec2(4.2578,-2.5997),vec2(-0.0391,-0.2070),vec2(2.2086,13.0546),30.9920);
-	d+=Distance(pos,vec2(0.9824,4.4131),vec2(0.2281,-0.2955),vec2(-0.6033,0.4780),vec2(-0.1544,0.1360),vec2(3.2020,12.2138),29.1169);
-	d+=Distance(pos,vec2(1.2733,-2.4752),vec2(-0.2821,-0.1180),vec2(3.4862,-0.7046),vec2(0.0224,0.2024),vec2(-2.2714,9.7317),6.3008);
-	d+=Distance(pos,vec2(2.6860,2.3608),vec2(-0.1486,0.2376),vec2(2.0568,1.5440),vec2(0.0367,0.1594),vec2(-2.0396,10.2225),25.5348);
-	d+=Distance(pos,vec2(0.5009,0.9612),vec2(0.1818,-0.1669),vec2(0.0698,-2.0880),vec2(0.1424,0.1063),vec2(1.7980,11.2733),35.7880);
-	
-	return d;
+  return 1.79284291400159 - 0.85373472095314 * r;
+}
+
+float snoise3(vec3 v)
+{
+	const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+	const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+
+	// First corner
+	vec3 i  = floor(v + dot(v, C.yyy) );
+	vec3 x0 =   v - i + dot(i, C.xxx) ;
+
+	// Other corners
+	vec3 g = step(x0.yzx, x0.xyz);
+	vec3 l = 1.0 - g;
+	vec3 i1 = min( g.xyz, l.zxy );
+	vec3 i2 = max( g.xyz, l.zxy );
+
+	//   x0 = x0 - 0.0 + 0.0 * C.xxx;
+	//   x1 = x0 - i1  + 1.0 * C.xxx;
+	//   x2 = x0 - i2  + 2.0 * C.xxx;
+	//   x3 = x0 - 1.0 + 3.0 * C.xxx;
+	vec3 x1 = x0 - i1 + C.xxx;
+	vec3 x2 = x0 - i2 + C.yyy; // 2.0*C.x = 1/3 = C.y
+	vec3 x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
+
+	// Permutations
+	i = mod289(i);
+	vec4 p = permute( permute( permute(
+				i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+			+ i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+			+ i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+
+	// Gradients: 7x7 points over a square, mapped onto an octahedron.
+	// The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)
+	float n_ = 0.142857142857; // 1.0/7.0
+	vec3  ns = n_ * D.wyz - D.xzx;
+
+	vec4 j = p - 49.0 * floor(p * ns.z * ns.z);  //  mod(p,7*7)
+
+	vec4 x_ = floor(j * ns.z);
+	vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)
+
+	vec4 x = x_ *ns.x + ns.yyyy;
+	vec4 y = y_ *ns.x + ns.yyyy;
+	vec4 h = 1.0 - abs(x) - abs(y);
+
+	vec4 b0 = vec4( x.xy, y.xy );
+	vec4 b1 = vec4( x.zw, y.zw );
+
+	//vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;
+	//vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;
+	vec4 s0 = floor(b0)*2.0 + 1.0;
+	vec4 s1 = floor(b1)*2.0 + 1.0;
+	vec4 sh = -step(h, vec4(0.0));
+
+	vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+	vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+
+	vec3 p0 = vec3(a0.xy,h.x);
+	vec3 p1 = vec3(a0.zw,h.y);
+	vec3 p2 = vec3(a1.xy,h.z);
+	vec3 p3 = vec3(a1.zw,h.w);
+
+	//Normalise gradients
+	vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+	p0 *= norm.x;
+	p1 *= norm.y;
+	p2 *= norm.z;
+	p3 *= norm.w;
+
+	// Mix final noise value
+	vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+	m = m * m;
+	return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),
+								dot(p2,x2), dot(p3,x3) ) );
+}
+
+float sdCave( vec3 p, int n, float persistence) {
+
+    float v = 0.0;
+    float total = 0.0;
+    float amplitude = 1.0;
+
+    for(int i = 0 ; i < 10; ++i) {
+        if(i >= n) { break; }
+
+        float signal = (1.0 - abs(  snoise3(p) )  );
+        signal = pow(signal, 8.0);
+
+        v += amplitude * signal;
+        total += amplitude;
+
+        amplitude  *= persistence;
+        p *= 2.0; // double freq.
+
+    }
+    return v / total;
 }
 
 #pragma glslify: export(sdCave)
