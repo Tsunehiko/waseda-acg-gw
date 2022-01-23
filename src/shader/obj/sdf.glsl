@@ -8,9 +8,11 @@ precision mediump float;
 const vec3 b = vec3(0.5, 0.3, 0.3);
 const float r = 0.08;
 
-float sdObj(vec3 p) { 
-    // return sdRegice(p);
-    return sdSphere(p, r); 
+float sdObj(vec3 p) {
+    float s = 3.0; 
+    p = p / s;
+    // return sdRegice(p) * s;  
+    return sdSphere(p, r) * s; 
     }
 
 #pragma glslify: export(sdObj)
