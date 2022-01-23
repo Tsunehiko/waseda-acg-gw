@@ -7,8 +7,9 @@ uniform vec2 resolution;
 uniform vec2 mouse;
 uniform float time;
 uniform uint seed;
-uniform usampler2D u_texture;
+uniform usampler2D seedTexture;
 
+#pragma glslify: DFAO = require('./ao/dfao.glsl')
 #pragma glslify: FSchlick = require('./bsdf/fschlick.glsl')
 #pragma glslify: G1 = require('./bsdf/g1.glsl')
 #pragma glslify: sampleM = require('./bsdf/samplem.glsl')
@@ -20,9 +21,7 @@ uniform usampler2D u_texture;
 #pragma glslify: hitScene = require('./scene/hit.glsl')
 #pragma glslify: skyColor = require('./scene/sky.glsl')
 #pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
-#pragma glslify: nlPlus = require('./util/nlplus.glsl')
 
-const float eps = 0.0001;
 const int maxHitNum = 8;
 const int sampleNum = 20;
 
@@ -46,6 +45,7 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
     vec3 coef = vec3(1);
     for (int i = 0; i < maxHitNum; i++) {
         Hit hit = hitScene(nowRay);
+
         if (!hit.check) return coef * skyColor();
         if (hit.param.isLight) return coef * hit.param.clight;
 
@@ -63,7 +63,7 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
             float n2 = hit.param.ior;
 
             refractDir = refract(-v, n, n1 / n2);
-            if (length(refractDir) > eps) {  // 全反射しない場合
+            if (length(refractDir) > 0.5) {  // 全反射しない場合
                 F = FSchlick(v, m, n1, n2);
                 doRefract = random(randState) > F;
             }
@@ -79,7 +79,7 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
             l = reflect(-v, m);
             coef *= F;
         }
-        coef *= hit.param.albedo * G1(l, n, m, hit.param.rg);
+        coef *= hit.param.albedo * G1(l, n, m, hit.param.rg) * DFAO(hit.pos, hit.normal);
         nowRay.origin = hit.pos;
         nowRay.dir = l;
     }
@@ -95,7 +95,7 @@ vec3 calcColor(Ray ray, inout RandState randState) {
 }
 
 void main() {
-    RandState randState = RandState(texture(u_texture, gl_FragCoord.xy / resolution)[0]);
+    RandState randState = RandState(texture(seedTexture, gl_FragCoord.xy / resolution)[0]);
 
     Camera camera = makeCamera();
     Ray ray = cameraRay(camera, 2.0 * gl_FragCoord.xy / resolution - 1.0);

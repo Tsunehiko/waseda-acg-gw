@@ -1,6 +1,6 @@
 precision mediump float;
 
-#pragma glslify: PI = require('../../const/pi.glsl')
+const float PI = 3.14159265358979324;
 
 vec3 sampleGGXVNDF(vec3 V_, float alpha_x, float alpha_y, float U1, float U2)
 {
