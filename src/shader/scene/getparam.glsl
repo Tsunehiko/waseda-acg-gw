@@ -3,7 +3,8 @@ precision mediump float;
 #pragma glslify: bgColor = require('./bg/color.glsl')
 #pragma glslify: sdBg = require('./bg/sdf.glsl')
 #pragma glslify: sdLight1 = require('./light.glsl')
-#pragma glslify: sdObj = require('./obj/sdf.glsl')
+#pragma glslify: sdBody = require('./obj/bodysdf.glsl')
+#pragma glslify: sdEye = require('./obj/eyesdf.glsl')
 #pragma glslify: ICE_F0 = require('../const/icef0.glsl')
 #pragma glslify: STONE_F0 = require('../const/stonef0.glsl')
 #pragma glslify: dummyParam = require('../param/dummy.glsl')
@@ -14,7 +15,8 @@ precision mediump float;
 int getIdx(vec3 p, float eps) {
     if (sdLight1(p) < eps) return 0;
     if (sdBg(p) < eps) return 1;
-    if (sdObj(p) < eps) return 2;
+    if (sdBody(p) < eps) return 2;
+    if (sdEye(p) < eps) return 3;
 
     return -1;
 }
@@ -48,6 +50,9 @@ Param getParam(vec3 p, float eps) {
             metallic = 0.0;
             canTransmit = true;
             break;
+        // レジアイス（目？）
+        case 3:
+            return getLightParam(vec3(2, 2, 1));
         default:
             return dummyParam;
     }
