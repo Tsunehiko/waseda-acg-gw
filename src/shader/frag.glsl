@@ -46,7 +46,7 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
     vec3 coef = vec3(1);
     for (int i = 0; i < maxHitNum; i++) {
         Hit hit = hitScene(nowRay);
-        if (!hit.check) return skyColor();
+        if (!hit.check) return coef * skyColor();
         if (hit.param.isLight) return coef * hit.param.clight;
 
         vec3 v = -nowRay.dir;
