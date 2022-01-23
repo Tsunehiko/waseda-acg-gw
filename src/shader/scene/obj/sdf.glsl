@@ -7,8 +7,7 @@ precision mediump float;
 
 float sdObj(vec3 p) { 
     //return sdSphere(p, 0.07);
-    p = p / 0.2;
-    return sdAdd(sdBody(p), sdEye(p)) * 0.2;
+    return sdAdd(sdBody(p), sdEye(p));
     }
 
 #pragma glslify: export(sdObj)
