@@ -52,7 +52,7 @@ Param getParam(vec3 p, float eps) {
             break;
         // レジアイス（目？）
         case 3:
-            return getLightParam(vec3(1, 1, 0.5));
+            return getLightParam(vec3(15));
         default:
             return dummyParam;
     }
