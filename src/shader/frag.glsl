@@ -23,7 +23,7 @@ uniform usampler2D u_texture;
 #pragma glslify: nlPlus = require('./util/nlplus.glsl')
 
 const float eps = 0.0001;
-const int maxHitNum = 5;
+const int maxHitNum = 8;
 const int sampleNum = 20;
 
 // HACK: なんか別ファイルに定義するとsyntax errorで動かないのでここにrand関係を書く
