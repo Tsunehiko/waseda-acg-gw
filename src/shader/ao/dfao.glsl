@@ -3,7 +3,7 @@ precision mediump float;
 #pragma glslify: scene = require('../scene/sdf.glsl')
 
 const float intensity = 0.05;
-const float stepSize = 0.03;
+const float stepSize = 0.006;
 const int maxIter = 18;
 
 // distance fielf ambient occlusion
