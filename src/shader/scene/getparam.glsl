@@ -34,7 +34,7 @@ Param getParam(vec3 p, float eps, sampler2D caveTexture) {
         case 1:
             ior = 0.0;
             rawF0 = vec3(0.045);  // stone
-            csurf = bgColor(p);
+            csurf = bgColor(p, caveTexture);
             rg = 0.9;
             metallic = 0.0;
             canTransmit = false;
