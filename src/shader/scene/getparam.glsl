@@ -19,7 +19,7 @@ int getIdx(vec3 p, float eps) {
     return -1;
 }
 
-Param getParam(vec3 p, float eps) {
+Param getParam(vec3 p, float eps, sampler2D caveTexture) {
     float ior;
     vec3 rawF0;
     vec3 csurf;

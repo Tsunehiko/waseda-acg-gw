@@ -26,7 +26,7 @@ Hit hitScene(Ray ray) {
         h = abs(scene(rayEnd));
 
         // 光線がヒットした
-        if (h < eps) return Hit(true, rayEnd, normal(rayEnd), getParam(rayEnd, eps));
+        if (h < eps) return Hit(true, rayEnd, normal(rayEnd), getParam(rayEnd, eps, caveTexture));
     }
 
     // 光線がヒットしなかった

@@ -81,6 +81,8 @@ const main = () => {
     var resolution_loc = gl.getUniformLocation(program, 'resolution');
     var mouse_loc = gl.getUniformLocation(program, 'mouse');
     var time_loc = gl.getUniformLocation(program, 'time');
+    var seedLocation = gl.getUniformLocation(program, "seedTexture");
+    var caveLocation = gl.getUniformLocation(program, "caveTexture");
     gl.uniform2f(resolution_loc, cSize.width, cSize.height);
 
     // seed for each pixel
@@ -88,14 +90,38 @@ const main = () => {
     var seed_ary = new Uint32Array(seed_num);
     for (var i = 0; i < seed_num; i++) seed_ary[i] = (Math.random() * 4294967296) >>> 0;
 
+    var textures = [];
+
     // seed texture
-    var seed_texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, seed_texture);
+    var seedTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, seedTexture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32UI, cSize.width, cSize.height, 0, gl.RED_INTEGER, gl.UNSIGNED_INT, seed_ary);
-    // なんか2回呼ばないとおかしくなる
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    // なんか2回呼ばないとおかしくなる
+    textures.push(seedTexture);
 
+    // cave texture
+    var caveTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, caveTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 0, 0, 255]));
+    var caveImage = new Image();
+    caveImage.src = "./shader/scene/bg/cave.jpg";
+    caveImage.addEventListener('load', function() {
+        // Copy the image to the texture
+         gl.bindTexture(gl.TEXTURE_2D, caveTexture);
+         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, caveImage);
+        });
+    textures.push(caveTexture);
+
+    gl.uniform1i(seedLocation, 0);  // texture unit 0
+    gl.uniform1i(caveLocation, 1);  // texture unit 1
+
+    gl.activeTexture(gl.TEXTURE + 0);
+    gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+    gl.activeTexture(gl.TEXTURE + 1);
+    gl.bindTexture(gl.TEXTURE_2D, textures[1]);
+    
     function render(ms_since_page_loaded) {
         gl.uniform1f(time_loc, ms_since_page_loaded / 1000.0);
         // TODO: mouse

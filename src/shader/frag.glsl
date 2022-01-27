@@ -7,7 +7,8 @@ uniform vec2 resolution;
 uniform vec2 mouse;
 uniform float time;
 uniform uint seed;
-uniform usampler2D seedTexture;
+uniform sampler2D seedTexture;
+uniform sampler2D caveTexture;
 
 #pragma glslify: DFAO = require('./ao/dfao.glsl')
 #pragma glslify: FSchlick = require('./bsdf/fschlick.glsl')
@@ -22,8 +23,8 @@ uniform usampler2D seedTexture;
 #pragma glslify: skyColor = require('./scene/sky.glsl')
 #pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
 
-const int maxHitNum = 8;
-const int sampleNum = 20;
+const int maxHitNum = 3;
+const int sampleNum = 2;
 
 // HACK: なんか別ファイルに定義するとsyntax errorで動かないのでここにrand関係を書く
 struct RandState { uint x; };
@@ -44,7 +45,7 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
     Ray nowRay = ray;
     vec3 coef = vec3(1);
     for (int i = 0; i < maxHitNum; i++) {
-        Hit hit = hitScene(nowRay);
+        Hit hit = hitScene(nowRay, caveTexture);
 
         if (!hit.check) return coef * skyColor();
         if (hit.param.isLight) return coef * hit.param.clight;
