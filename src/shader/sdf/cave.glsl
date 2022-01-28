@@ -103,8 +103,8 @@ float sdCave(vec3 p, vec3 a, vec3 b, float r, float w)
     float x2 = x*x;
     float y2 = y*y*baba;
     float d = (max(x,y)<0.0)?-min(x2,y2):(((x>0.0)?x2:0.0)+((y>0.0)?y2:0.0));
-    float noise = snoise3(p) * w;
-    return -(sign(d)*sqrt(abs(d))/baba + noise);
+    // float noise = snoise3(p) * w;
+    return -(sign(d)*sqrt(abs(d))/baba);
 }
 
 #pragma glslify: export(sdCave)

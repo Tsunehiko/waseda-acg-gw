@@ -14,7 +14,7 @@ const float farLen = 5.0;
 const int maxStep = 256;
 const float eps = 0.0001;
 
-Hit hitScene(Ray ray) {
+Hit hitScene(Ray ray, sampler2D caveTexture) {
     float t = nearLen;
     float h;
     for (int i = 0; i < maxStep; i++, t += h) {
@@ -26,7 +26,7 @@ Hit hitScene(Ray ray) {
         h = abs(scene(rayEnd));
 
         // 光線がヒットした
-        if (h < eps) return Hit(true, rayEnd, normal(rayEnd), getParam(rayEnd, eps));
+        if (h < eps) return Hit(true, rayEnd, normal(rayEnd), getParam(rayEnd, eps, caveTexture));
     }
 
     // 光線がヒットしなかった
