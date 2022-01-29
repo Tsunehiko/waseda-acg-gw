@@ -1,13 +1,9 @@
 #version 300 es
 precision mediump float;
-precision mediump usampler2D;
 
 out vec4 colorOut;
 uniform vec2 resolution;
-uniform vec2 mouse;
 uniform float time;
-uniform uint seed;
-uniform sampler2D seedTexture;
 uniform sampler2D caveTexture;
 
 #pragma glslify: DFAO = require('./ao/dfao.glsl')
@@ -22,25 +18,12 @@ uniform sampler2D caveTexture;
 #pragma glslify: hitScene = require('./scene/hit.glsl')
 #pragma glslify: skyColor = require('./scene/sky.glsl')
 #pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
+#pragma glslify: random3 = require('./util/random.glsl')
 
 const int maxHitNum = 3;
 const int sampleNum = 2;
 
-// HACK: なんか別ファイルに定義するとsyntax errorで動かないのでここにrand関係を書く
-struct RandState { uint x; };
-
-uint xorShift32(inout RandState randState) {
-    uint x = randState.x;
-    x ^= x << 13u;
-    x ^= x >> 17u;
-    x ^= x << 5u;
-    randState.x = x;
-    return x;
-}
-
-float random(inout RandState randState) { return float(xorShift32(randState)) / 4294967296.0; }
-
-vec3 sampleColor(Ray ray, inout RandState randState) {
+vec3 sampleColor(Ray ray, vec3 randoms) {
     // 一定回数反射する・反射しなくなる・光源に当たるまでカメラからrayを飛ばす
     Ray nowRay = ray;
     vec3 coef = vec3(1);
@@ -53,7 +36,7 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
         vec3 v = -nowRay.dir;
         bool goOut = dot(hit.normal, v) < 0.0;
         vec3 n = goOut ? -hit.normal : hit.normal;
-        vec3 m = sampleM(n, hit.param.rg, random(randState), random(randState));
+        vec3 m = sampleM(n, hit.param.rg, randoms[0], randoms[1]);
 
         // 反射させるか屈折させるかを決定する
         bool doRefract = false;
@@ -66,7 +49,7 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
             refractDir = refract(-v, n, n1 / n2);
             if (length(refractDir) > 0.5) {  // 全反射しない場合
                 F = FSchlick(v, m, n1, n2);
-                doRefract = random(randState) > F;
+                doRefract = randoms[2] > F;
             }
         }
 
@@ -89,17 +72,20 @@ vec3 sampleColor(Ray ray, inout RandState randState) {
     return vec3(0);
 }
 
-vec3 calcColor(Ray ray, inout RandState randState) {
+vec3 calcColor(Ray ray) {
+    // HACK: 配列を渡すのは面倒なのでここで初期s0生成などをやる
+    uint s0 = uint(fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) * 4294967296.0);
+    vec3 randomsAry[sampleNum];
+    for (int i = 0; i < sampleNum; i++) randomsAry[i] = random3(s0);
+
     vec3 color = vec3(0);
-    for (int i = 0; i < sampleNum; i++) color += sampleColor(ray, randState);
+    for (int i = 0; i < sampleNum; i++) color += sampleColor(ray, randomsAry[i]);
     return color / float(sampleNum);
 }
 
 void main() {
-    RandState randState = RandState(texture(seedTexture, gl_FragCoord.xy / resolution)[0]);
-
     Camera camera = makeCamera();
     Ray ray = cameraRay(camera, 2.0 * gl_FragCoord.xy / resolution - 1.0);
-    vec3 color = calcColor(ray, randState);
+    vec3 color = calcColor(ray);
     colorOut = vec4(gammaCorrect(color), 1);
 }
