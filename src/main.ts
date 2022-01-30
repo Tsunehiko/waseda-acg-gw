@@ -1,5 +1,6 @@
 import vertexShaderSource from './shader/vert.glsl'
 import fragmentShaderSource from './shader/frag.glsl'
+import {caveSrc} from '../resources/cave'
 
 const cSize = {
     width: 400,
@@ -9,7 +10,27 @@ type cSize = typeof cSize[keyof typeof cSize];
 
 const VERTEX_SIZE = 3; 
 
-const main = () => {
+const loadImage = (src, callback) => {
+    const image = new Image();
+    image.src = src;
+    image.onload = callback;
+    return image;
+}
+
+const loadImages = (src_list, callback) => {
+    var leftNum = src_list.length;
+    const onImageLoad = () => {
+        leftNum--;
+        if (leftNum == 0) callback(images);
+    }
+
+    var images = [];
+    for (var i = 0; i < leftNum; i++) {
+        images.push(loadImage(src_list[i], onImageLoad));
+    }
+}
+
+const render = (images) => {
     const canvas = document.createElement('canvas');
     canvas.width = cSize.width;
     canvas.height = cSize.height;
@@ -78,32 +99,21 @@ const main = () => {
     gl.enable(gl.DEPTH_TEST);
 
     // uniform
-    var resolutionLocation = gl.getUniformLocation(program, 'resolution');
-    var timeLocation = gl.getUniformLocation(program, 'time');
-    var caveLocation = gl.getUniformLocation(program, 'caveTexture');
+    const resolutionLocation = gl.getUniformLocation(program, 'resolution');
+    const timeLocation = gl.getUniformLocation(program, 'time');
+    const caveLocation = gl.getUniformLocation(program, 'caveTexture');
     gl.uniform2f(resolutionLocation, cSize.width, cSize.height);
 
-    var caveTexture = gl.createTexture();
+    // texture
+    const caveTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, caveTexture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 0, 0, 255]));
-    var caveImage = new Image();
-    caveImage.src = './shader/scene/bg/cave.jpg';
-    caveImage.addEventListener(
-        'load',
-        () => {
-            // Copy the image to the texture
-            gl.bindTexture(gl.TEXTURE_2D, caveTexture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, caveImage);
-        }
-    );
-
-    // Set the parameters so we don't need mips
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[0]);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-    function render(ms_since_page_loaded) {
+    const draw = (ms_since_page_loaded) => {
         gl.uniform1f(timeLocation, ms_since_page_loaded / 1000.0);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertices.length / VERTEX_SIZE);
@@ -113,9 +123,10 @@ const main = () => {
     }
 
     // First render which will request animation
-    render(0);
+    draw(0);
 
     gl.flush();
 }
 
+const main = () => { loadImages([caveSrc], render); }
 window.onload = main;
