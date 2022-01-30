@@ -20,8 +20,8 @@ uniform sampler2D caveTexture;
 #pragma glslify: gammaCorrect = require('./util/gammacorrect.glsl')
 #pragma glslify: random3 = require('./util/random.glsl')
 
-const int maxHitNum = 3;
-const int sampleNum = 2;
+const int maxHitNum = 8;
+const int sampleNum = 20;
 
 vec3 sampleColor(Ray ray, vec3 randoms) {
     // 一定回数反射する・反射しなくなる・光源に当たるまでカメラからrayを飛ばす
