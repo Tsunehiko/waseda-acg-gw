@@ -122,19 +122,15 @@ float fbm( vec3 p, int n, float persistence) {
 
 vec3 bgColor(vec3 p, sampler2D caveTexture) {
 
-	vec2 v_texCoord = vec2(p.x + p.z, p.y + p.z);
-	vec3 color = texture(caveTexture, v_texCoord).rgb;
-	return color;
+    float uu = (p.z + 5.0) / 10.0;
 
-    // float t = fbm(p, 8, 0.8);
+    float theta = acos(p.x * inversesqrt(p.x * p.x + p.y * p.y));
+	float weight = 0.175;
+    float v = theta / (3.14159265358979323846*2.0) + (acos(p.x) + asin(p.y)) * weight;
 
-    // if(t < 0.25) {
-    //     return vec3(0.0);
-    // } else if(t > 0.25 && t <0.5) {
-    //     return mix(color_a, color_b,  (t-0.25) /0.25 );
-    // }else{
-    //     return mix(color_b, color_c,  (t-0.5) /0.5 );
-    // }
+    vec2 uv = vec2(uu, v);
+    vec3 color = texture(caveTexture, uv).rgb;
+    return color;
 }
 
 #pragma glslify: export(bgColor)
