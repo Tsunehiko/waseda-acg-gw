@@ -24,7 +24,7 @@ and and you can see the result at `localhost:8081`.
 
 ## How to Make index.html
 
-You can make `index.html` in the `dist` directory by the following command:
+You can make `dist/index.html` by the following command:
 
 ```
 $ npm run pack
